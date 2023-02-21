@@ -1,0 +1,250 @@
+<!DOCTYPE>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta content="charset=UTF-8"/>
+<title>3DHOP - 3D Heritage Online Presenter</title>
+<!--STYLESHEET-->
+<link type="text/css" rel="stylesheet" href="3dhop.css"/>  
+<!--SPIDERGL-->
+<script type="text/javascript" src="spidergl.js"></script>   
+<!--JQUERY-->
+<script type="text/javascript" src="jquery.js"></script>  
+<!--PRESENTER-->
+<script type="text/javascript" src="presenter.js"></script>
+<!--3D MODELS LOADING AND RENDERING-->
+<script type="text/javascript" src="nexus.js"></script>
+<script type="text/javascript" src="ply.js"></script>
+<!--TRACKBALLS-->
+<script type="text/javascript" src="trackball_turntable.js"></script>
+<script type="text/javascript" src="trackball_turntable_pan.js"></script>
+<script type="text/javascript" src="trackball_pantilt.js"></script>
+<script type="text/javascript" src="trackball_sphere.js"></script>
+<!--UTILITY-->
+<script type="text/javascript" src="init.js"></script>
+
+
+<style>
+
+.scroll-bg {
+	position: absolute;
+	top: -20%;
+	left: 65%;
+	width: 400px;
+	color: white;
+	font-family: "Open Sans";
+	margin: 10% auto;
+	padding: 30px;
+}
+</style>
+
+
+</head>
+<body>
+<div id="3dhop" class="tdhop" onmousedown="if (event.preventDefault) event.preventDefault()"><div id="tdhlg"></div>
+ <div id="toolbar">
+  <img id="home"        title="Home"                   src="home.png"/><br/>
+<!--ZOOM-->
+  <img id="zoomin"      title="Zoom In"                src="zoomin.png"/><br/>
+  <img id="zoomout"     title="Zoom Out"               src="zoomout.png"/><br/>
+<!--ZOOM-->
+<!--LIGHTING-->
+  <img id="lighting_off" title="Enable Lighting"       src="lighting_off.png" style="position:absolute; visibility:hidden;"/>
+  <img id="lighting"     title="Disable Lighting"      src="lighting.png"/><br/>
+<!--LIGHTING-->
+<!--LIGHT-->
+  <img id="light_on"    title="Disable Light Control"  src="lightcontrol_on.png" style="position:absolute; visibility:hidden;"/>
+  <img id="light"       title="Enable Light Control"   src="lightcontrol.png"/><br/>
+<!--LIGHT-->
+<!--MEASURE-->
+  <img id="measure_on"  title="Disable Measure Tool"   src="measure_on.png" style="position:absolute; visibility:hidden;"/>
+  <img id="measure"     title="Enable Measure Tool"    src="measure.png"/><br/>
+<!--MEASURE-->
+<!--POINT PICKING-->
+  <img id="pick_on"     title="Disable PickPoint Mode" src="pick_on.png" style="position:absolute; visibility:hidden;"/>
+  <img id="pick"        title="Enable PickPoint Mode"  src="pick.png"/><br/>
+<!--POINT PICKING-->
+<!--SECTIONS-->
+  <img id="sections_on" title="Disable Plane Sections" src="sections_on.png" style="position:absolute; visibility:hidden;"/>
+  <img id="sections"    title="Enable Plane Sections"  src="sections.png"/><br/>
+<!--SECTIONS-->
+<!--COLOR-->
+  <img id="color_on"    title="Disable Solid Color"    src="color_on.png" style="position:absolute; visibility:hidden;"/>
+  <img id="color"       title="Enable Solid Color"     src="color.png"/><br/>
+<!--COLOR-->
+<!--CAMERA-->
+  <img id="perspective"  title="Perspective Camera"    src="perspective.png" style="position:absolute; visibility:hidden;"/>
+  <img id="orthographic" title="Orthographic Camera"   src="orthographic.png"/><br/>
+<!--CAMERA-->
+<!--SCREENSHOT-->
+  <img id="screenshot" title="Save Screenshot"   src="screenshot.png"/><br/>
+<!--SCREENSHOT-->
+<!--FULLSCREEN-->
+  <img id="full_on"     title="Exit Full Screen"       src="full_on.png" style="position:absolute; visibility:hidden;"/>
+  <img id="full"        title="Full Screen"            src="full.png"/>
+<!--FULLSCREEN-->
+ </div>
+
+
+
+
+
+<!--MEASURE-->   <!-- pannelli strumento di misurazione e di point picking che riporta valori misurati o x, y, z -->
+ <div id="measure-box" class="output-box">Measured length<hr/><span id="measure-output" class="output-text" onmousedown="event.stopPropagation()">0.0</span></div>
+<!--MEASURE-->
+
+<!--POINT PICKING-->
+ <div id="pickpoint-box" class="output-box">XYZ picked point<hr/><span id="pickpoint-output" class="output-text" onmousedown="event.stopPropagation()">[ 0 , 0 , 0 ]</span></div>
+<!--POINT PICKING-->
+
+
+
+
+
+
+<!--SECTIONS-->
+ <div id="sections-box" class="output-box">
+  <table class="output-table" onmousedown="event.stopPropagation()">
+	<tr><td>Plane</td><td>Position</td><td>Flip</td></tr>
+	<tr>
+		<td><img   id="xplane_on"    title="Disable X Axis Section" src="sectionX_on.png" onclick="sectionxSwitch()" style="position:absolute; visibility:hidden; border:1px inset;"/>
+			<img   id="xplane"       title="Enable X Axis Section"  src="sectionX.png"  onclick="sectionxSwitch()"/><br/></td>
+		<td><input id="xplaneSlider" class="output-input"  type="range"    title="Move X Axis Section Position"/></td>
+		<td><input id="xplaneFlip"   class="output-input"  type="checkbox" title="Flip X Axis Section Direction"/></td></tr>
+	<tr>
+		<td><img   id="yplane_on"    title="Disable Y Axis Section" src="sectionY_on.png" onclick="sectionySwitch()" style="position:absolute; visibility:hidden; border:1px inset;"/>
+			<img   id="yplane"       title="Enable Y Axis Section"  src="sectionY.png"  onclick="sectionySwitch()"/><br/></td>
+		<td><input id="yplaneSlider" class="output-input"  type="range"    title="Move Y Axis Section Position"/></td>
+		<td><input id="yplaneFlip"   class="output-input"  type="checkbox" title="Flip Y Axis Section Direction"/></td></tr>
+	<tr>
+		<td><img   id="zplane_on"    title="Disable Z Axis Section" src="sectionZ_on.png" onclick="sectionzSwitch()" style="position:absolute; visibility:hidden; border:1px inset;"/>
+			<img   id="zplane"       title="Enable Z Axis Section"  src="sectionZ.png"  onclick="sectionzSwitch()"/><br/></td>
+		<td><input id="zplaneSlider" class="output-input"  type="range"    title="Move Y Axis Section Position"/></td>
+		<td><input id="zplaneFlip"   class="output-input"  type="checkbox" title="Flip Z Axis Section Direction"/></td></tr></table>
+  <table class="output-table" onmousedown="event.stopPropagation()" style="text-align:right;">
+	<tr>
+	 <td>Show planes<input id="showPlane" class="output-input" type="checkbox" title="Show Section Planes" style="bottom:-3px;"/></td>
+	 <td>Show edges<input  id="showBorder" class="output-input" type="checkbox" title="Show Section Edges" style="bottom:-3px;"/></td></tr></table>
+ </div>
+ 
+<div class="scroll-bg">
+
+	<h2> L'opera </h2>
+	<p> Il grande monumento funebre a Giuseppe Todde, economista e giurista di Villacidro, docente alle Universita' di Cagliari e Sassari e infine rettore a Cagliari, fu commissionato tre anni prima della sua morte, avvenuta nel 1894, allo scultore piemontese Giuseppe Sartorio. A colpire non è tanto il busto che ritrae il destinatario del monumento (qui non visibile), bensì l'elegante figura ai suoi piedi: si tratta di Luigia Oppo, moglie del defunto.
+
+	Pare che l'opera sia stata voluta in quella forma proprio dalla signora Oppo, che morì 21 anni dopo il marito, per cui per tutti quegli anni le persone che si recarono in cimitero poterono vedere sia la signora in carne ed ossa che la sua versione in marmo.
+	
+	Della vedova colpisce lo sguardo carico di pathos e di devozione, rivolto in alto verso il busto del marito; l'abbigliamento è quello tipico femminile di tardo Ottocento, con il caratteristico scialle in pizzo reso con grande minuzia di particolari. La donna si porta al petto una croce con la mano sinistra, mentre con la destra tiene il segno di un libro di preghiere; la posa è al contempo naturale ed elegante, ed esprime il contegno ma allo stesso tempo il dolore per la perdita del marito.
+	</p>
+ </div>
+<!--SECTIONS-->
+
+ <canvas id="draw-canvas" style="background-image: url(dark.jpg)"/>
+</div>
+</body>
+
+<script type="text/javascript">
+var presenter = null;
+
+function setup3dhop() {
+	presenter = new Presenter("draw-canvas");
+
+	presenter.setScene({
+		meshes: {
+			"mesh_1" : { url: "statua2.nxz" }
+		},
+		modelInstances : {
+			"model_1" : { 
+				mesh  : "mesh_1",
+				color : [0.8, 0.7, 0.75]
+			}
+		},
+		trackball: {  //paradigma dell'oggetto in mano; sfera dentro cui c'è il modello; interazione uguale a meshlab anche se non vediamo la trackball
+			type : TurntablePanTrackball,
+			trackOptions : {
+				startPhi: 35.0,
+				startTheta: 15.0,
+				startDistance: 2.5, //distanza iniziale in cui il modello è posizionato (se cambio, più vicino o più lontano)
+				minMaxPhi: [-180, 180],
+				minMaxTheta: [-30.0, 70.0],
+				minMaxDist: [0.5, 3.0]
+			}
+		}
+	});
+
+<!-- oggetto JS che dice cosa succede quando ottengo misura su scena;
+
+//--MEASURE--
+	presenter._onEndMeasurement = onEndMeasure;   // gestore di eventi legato a funzione onEndMeasure
+//--MEASURE--
+
+//--POINT PICKING--
+	presenter._onEndPickingPoint = onEndPick;
+//--POINT PICKING--
+
+//--SECTIONS--
+	sectiontoolInit();
+//--SECTIONS--
+}
+
+function actionsToolbar(action) {
+	if(action=='home') presenter.resetTrackball();
+//--FULLSCREEN--
+	else if(action=='full'  || action=='full_on') fullscreenSwitch();
+//--FULLSCREEN--
+//--ZOOM--
+	else if(action=='zoomin') presenter.zoomIn();
+	else if(action=='zoomout') presenter.zoomOut();
+//--ZOOM--
+//--LIGHTING--
+	else if(action=='lighting' || action=='lighting_off') { presenter.enableSceneLighting(!presenter.isSceneLightingEnabled()); lightingSwitch(); }
+//--LIGHTING--
+//--LIGHT--
+	else if(action=='light' || action=='light_on') { presenter.enableLightTrackball(!presenter.isLightTrackballEnabled()); lightSwitch(); }
+//--LIGHT--
+//--CAMERA--
+	else if(action=='perspective' || action=='orthographic') { presenter.toggleCameraType(); cameraSwitch(); }
+//--CAMERA--
+//--COLOR--
+	else if(action=='color' || action=='color_on') { presenter.toggleInstanceSolidColor(HOP_ALL, true); colorSwitch(); }
+//--COLOR--
+//--MEASURE--
+	else if(action=='measure' || action=='measure_on') { presenter.enableMeasurementTool(!presenter.isMeasurementToolEnabled()); measureSwitch(); }
+//--MEASURE--
+//--POINT PICKING--
+	else if(action=='pick' || action=='pick_on') { presenter.enablePickpointMode(!presenter.isPickpointModeEnabled()); pickpointSwitch(); }
+//--POINT PICKING--
+//--SCREENSHOT--
+	else if(action=='screenshot') presenter.saveScreenshot();
+//--SCREENSHOT--
+//--SECTIONS--
+	else if(action=='sections' || action=='sections_on') { sectiontoolReset(); sectiontoolSwitch(); }
+//--SECTIONS--
+}
+
+//--MEASURE--
+function onEndMeasure(measure) {
+	// measure.toFixed(2) sets the number of decimals when displaying the measure
+	// depending on the model measure units, use "mm","m","km" or whatever you have
+	$('#measure-output').html(measure.toFixed(2) + "mm"); 
+}
+//--MEASURE--
+
+//--PICKPOINT--
+function onEndPick(point) {
+	// .toFixed(2) sets the number of decimals when displaying the picked point	
+	var x = point[0].toFixed(2);
+	var y = point[1].toFixed(2);
+	var z = point[2].toFixed(2);
+    $('#pickpoint-output').html("[ "+x+" , "+y+" , "+z+" ]");
+} 
+//--PICKPOINT--	
+
+$(document).ready(function(){
+	init3dhop();
+
+	setup3dhop();
+});
+</script>
+</html>
